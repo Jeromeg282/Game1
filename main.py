@@ -6,7 +6,7 @@ region_array = []
 
 
 class Player():
-    def __init__(self):
+    def __init__(self, current_region):
         #input = input("You are in Teyvat. Where would you like to go [N], [E], [S], [W]")
         self.current_region = current_region
         self.inventory = []
@@ -36,10 +36,12 @@ class Region():
             print("This region is a shop.")
         print("Exits:", ", ".join(self.exits))
 
-def initialize_game():
+def initialize_game(self):
     player = Player(current_region=world[0])
+    #world is not defined
+    self.world = world
 
-initialize_game()
+initialize_game(self)
 
 class game_loop():
     while True:
@@ -58,7 +60,7 @@ world.append(
     Region(
         0,
         "You are in Monstadt",
-        ['n','s']
+        ['n','s'],
         is_shop = True
     )
     
