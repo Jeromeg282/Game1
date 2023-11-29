@@ -41,7 +41,7 @@ def initialize_game(self):
     #world is not defined
     self.world = world
 
-initialize_game(self)
+initialize_game()
 
 class game_loop():
     while True:
@@ -73,4 +73,10 @@ world.append(
     )
 )
 
+world.append(
+    Region(
+        2, "You are in Inazuma", ['n' , 'w'], 
+        is_shop = True
+    )
+)
 print( world[0].__dict__ )
