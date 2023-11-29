@@ -12,7 +12,7 @@ class Player():
         self.inventory = []
 
     def move(self,direction):
-        
+        if directio not in 
         pass
 
     def take_action(self,action):
