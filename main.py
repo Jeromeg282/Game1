@@ -12,7 +12,8 @@ class Player():
         self.inventory = []
 
     def move(self,direction):
-        if directio not in 
+        if direction not in exit:
+            return("Direction does not exist.")
         pass
 
     def take_action(self,action):

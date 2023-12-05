@@ -9,6 +9,7 @@ def player_stat():
     print('----------------------------')
     print('You are in the {}'.format(currentRoom))
     print('----------------------------')
+    print(f'{exits}')
 
 
 # start player in Great Hall
