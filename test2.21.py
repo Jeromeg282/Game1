@@ -65,8 +65,8 @@ class Player:
         base_chance = monster['base_chance']
         if 'item_boost' in self.inventory:
             base_chance += self.inventory['item_boost']
-        chance = min(base_chance, 100)  # Ensure chance does not exceed 100%
-        result = random.random() * 100  # Generate a random percentage
+        chance = min(base_chance, 100)  
+        result = random.random() * 100  # random
 
         if result <= chance:
             self.money += monster['reward']
@@ -131,22 +131,37 @@ def initialize_game():
         Region(
             0,
             "You are in Mondstadt",
-            {'north': 1, 'south': 2},
+            {'west': 1, 'south': 2},
             is_shop=True,
             shop_items=["Item Boost (+5% chance for monster encounters)", "Gacha Spin"]
         )
     )
 
+    Region(
+            1,
+            "You are in a Ruin",
+            {'east': 0, 'south': 3},
+            is_shop=True,
+            shop_items=["Item Boost (+5% chance for monster encounters)", "Gacha Spin"]
+        )
+
     world.append(
         Region(
-            1, "You are in Grass Plain 1", {'south': 0},
+            2, "You are in Grass Plain 1", {'south': 0},
             is_grass_plain=True
         )
     )
 
+Region(
+            3,
+            "You are in Plains 2",
+            {'north': 1, 'east': 2, 'south': 2},
+            is_grass_plain=True
+        )
+
     world.append(
         Region(
-            2, "You are in Liyue", {'north': 0, 'south': 4},
+            4, "You are in Liyue", {'north': 0, },
             is_shop=True,
             shop_items=["Health Potion", "Gacha Spin"],
             gacha_items=["Character A", "Item X"]
@@ -226,7 +241,7 @@ def generate_monster():
 
 while True:
     player.current_region.display_info()
-    player_input = input("Enter a direction to move, 'shop' to enter the shop, 'gacha' to spin the gacha, 'inventory' to check your inventory, or 'q' to quit: ").lower()
+    player_input = input("Enter a direction to move, 'shop' to enter the shop, 'inventory' to check your inventory, or 'q' to quit: ").lower()
 
     if player_input == 'q':
         print("Thanks for playing! Goodbye.")
