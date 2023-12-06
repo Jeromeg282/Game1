@@ -152,7 +152,7 @@ def initialize_game():
         )
     )
 
-Region(
+        Region(
             3,
             "You are in Plains 2",
             {'north': 1, 'east': 2, 'south': 2},
