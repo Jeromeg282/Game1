@@ -130,43 +130,136 @@ def initialize_game():
     world.append(
         Region(
             0,
-            "You are in Mondstadt",
+            "You are in Mondstadt. (west:Ruins, south:Plains)",
             {'west': 1, 'south': 2},
             is_shop=True,
             shop_items=["Item Boost (+5% chance for monster encounters)", "Gacha Spin"]
         )
     )
-
-    Region(
+    world.append(
+        Region(
             1,
             "You are in a Ruin",
             {'east': 0, 'south': 3},
             is_shop=True,
             shop_items=["Item Boost (+5% chance for monster encounters)", "Gacha Spin"]
         )
-
+    )
     world.append(
         Region(
-            2, "You are in Grass Plain 1", {'south': 0},
+            2, "You are in Grass Plains 2", {'north':0, 'west' : 3, 'south': 5},
             is_grass_plain=True
         )
     )
 
-Region(
+    world.append(
+        Region(
             3,
-            "You are in Plains 2",
-            {'north': 1, 'east': 2, 'south': 2},
+            "You are in Plains 3",
+            {'north': 1, 'east': 2, 'south': 4},
             is_grass_plain=True
         )
+    )
 
     world.append(
         Region(
-            4, "You are in Liyue", {'north': 0, },
+            4, "You are in Liyue. (north:Plains, south:Water, west:Plains, east:Dragonspine)", 
+            {'north': 3, 'east': 5, 'west': 6, 'south': 13},
             is_shop=True,
             shop_items=["Health Potion", "Gacha Spin"],
             gacha_items=["Character A", "Item X"]
         )
     )
+    world.append(
+        Region(
+            5, "You are in Dragonspine. (north:Plains, south:Water, west:Liyue)",
+            {'north': 2, 'west': 4, 'south': 11 },
+            is_shop=False,
+            shop_items=["Health Potion", "Gacha Spin"],
+            gacha_items=["Character A", "Item X"]
+        )
+    )
+
+    world.append(
+        Region(
+            6,
+            "You are in Grass Plains (west:Sumeru, east:Liyue)",
+            {'west': 7, 'east': 4},
+            is_grass_plain=True
+        )
+    )
+    world.append(
+        Region(
+            7, "You are in Sumeru. (west:Desert, east:Grass plains)",
+            {'west': 8, 'east': 6},
+            is_shop=True,
+            shop_items=["Health Potion", "Gacha Spin"],
+            gacha_items=["Character A", "Item X"]
+        )
+    )
+    world.append(
+        Region(
+            8,
+            "You are in Desert. (east:Sumeru, North:Water)",
+            {'north': 9, 'east': 7, },
+            is_grass_plain=True
+        )
+    )
+
+    world.append(
+        Region(
+            9,
+            "You are in the Water. (north:Fontaine, south:Desert)",
+            {'north': 10, 'south': 8},
+            is_grass_plain=False
+        )
+    )
+    world.append(
+        Region(
+            10, "You are in Fontaine. (south:Water)", 
+            {'south': 9},
+            is_shop=True,
+            shop_items=["Health Potion", "Gacha Spin"],
+            gacha_items=["Character A", "Item X"]
+        )
+    )
+    
+    world.append(
+        Region(
+            11,
+            "You are in the water. (north:Dragonspine, west:water, south:Inazuma)",
+            {'north': 5, 'west': 13, 'south': 12},
+            is_grass_plain=False
+        )
+    )
+    world.append(
+        Region(
+            12, "You are in Inazuma. (North:Water)", 
+            {'north': 11},
+            is_shop=True,
+            shop_items=["Health Potion", "Gacha Spin"],
+            gacha_items=["Character A", "Item X"]
+        )
+    )
+    world.append(
+        Region(
+            13,
+            "You are in the Water. (south:Water, north:Liyue, east:Water)",
+            {'north': 4, 'east': 11, 'south': 14},
+            is_grass_plain=False
+        )
+    )
+
+    world.append(
+        Region(
+            14,
+            "You are in the Water.",
+            {'north': 13, 'east': 12},
+            is_grass_plain=False
+        )
+    )
+
+
 
     player = Player(current_region=world[0])
 
