@@ -1,40 +1,20 @@
 import time
 import random
-
-class Player:
-    def __init__(self, current_region):
-        self.current_region = current_region
-        self.inventory = []
-        self.money = 0
-        self.encountered_monsters = []
-        self.gacha_contents = [
-            ("Monstadt", ["Fischl", "Klee"]),
-            ("Liyue", ["Raiden", "Yae Miko"]),
+#make inventory as list of id numbers
+class GachaSystem:
+    def __init__(self):
+        # gacha_contents is now a dictionary with regions as keys and another dictionary
+        # with items and their percentages as values
+        self.gacha_contents = {
+            "Monstadt": {"Fischl": 20, "Klee": 10, "CharacterA": 5, "ItemX": 65},
+            "Liyue": {"Raiden": 15, "Yae Miko": 15, "CharacterB": 10, "ItemY": 60},
             
-        ]
+        }
+        self.inventory = []
 
-    def move(self, direction):
-        if direction not in self.current_region.exits:
-            return "\033[1;31mInvalid region.\033[0m" #Red
-        else:
-            next_region_id = self.current_region.exits[direction]
-            next_region = next((r for r in world if r.id == next_region_id), None)
-            if next_region:
-                self.current_region = next_region
-                return f"You have moved to {self.current_region.description}"
-            else:
-                return "\033[1;31mInvalid region.\033[0m" #red
-
-    def take_action(self, action):
-        if action.lower() == 'shop' and self.current_region.is_shop:
-            enter_shop()
-        elif action.lower() == 'gacha' and not self.current_region.is_shop:
-            self.gacha_menu()
-        else:
-            print("\033[1;31mInvalid choice. Please try again.\033[0m")
-
-    
-    
+    def update_gacha_contents(self, region_description):
+        self.current_gacha_pool = self.gacha_contents.get(region_description, {})
+        
     def gacha_menu(self):
         print("\nGacha Menu:")
         print("1. Spin Gacha")
@@ -44,22 +24,68 @@ class Player:
         if choice == '1':
             self.spin_gacha()
         elif choice == '2':
-            print("Returning to main menu.")
+            print("Returning to the main menu.")
         else:
             print("\033[1;31mInvalid choice. Please try again.\033[0m")
 
-
     def spin_gacha(self):
-        current_gacha_pool = next((pool for region, pool in self.gacha_contents if region == self.current_region.description), None)
-
-        if not current_gacha_pool:
+        if not self.current_gacha_pool:
             print("No items available in the current gacha pool.")
             return
 
-        item = random.choice(current_gacha_pool)
-        current_gacha_pool.remove(item)
+        input("Press Enter to spin the gacha...")
+
+        item = self.roll_item(self.current_gacha_pool)
         self.inventory.append(item)
         print("\033[1;32mCongratulations! You got {}\033[0m".format(item))
+    
+
+    def roll_item(self, gacha_pool):
+        total_percentage = sum(gacha_pool.values())
+        roll = random.randint(1, total_percentage)
+
+        cumulative_percentage = 0
+        for item, percentage in gacha_pool.items():
+            cumulative_percentage += percentage
+            if roll <= cumulative_percentage:
+                return item
+
+        # in case
+        return random.choice(list(gacha_pool.keys()))
+
+
+class Player:
+    def __init__(self, current_region):
+        self.current_region = current_region
+        self.inventory = []
+        self.money = 0
+        self.encountered_monsters = []
+        self.gacha_system = GachaSystem()
+
+    def move(self, direction):
+        if direction not in self.current_region.exits:
+            return "\033[1;31mInvalid region.\033[0m"
+        else:
+            next_region_id = self.current_region.exits[direction]
+            next_region = next((r for r in world if r.id == next_region_id), None)
+            if next_region:
+                self.current_region = next_region
+                self.gacha_system.update_gacha_contents(self.current_region.description)
+                return f"You have moved to {self.current_region.description}"
+            else:
+                return "\033[1;31mInvalid region.\033[0m"
+
+    def take_action(self, action):
+        if action.lower() == 'shop' and self.current_region.is_shop:
+            enter_shop()
+        elif action.lower() == 'gacha' and not self.current_region.is_shop:
+            self.gacha_system.gacha_menu()
+        else:
+            print("\033[1;31mInvalid choice. Please try again.\033[0m")
+
+    def spin_gacha(self):
+        self.gacha_system.spin_gacha()
+
 
     def fight_monster(self, monster):
         base_chance = monster['base_chance']
@@ -78,8 +104,8 @@ class Player:
         base_chance = monster['base_chance']
         if 'item_boost' in self.inventory:
             base_chance += self.inventory['item_boost']
-        chance = min(base_chance, 100)  # Ensure chance does not exceed 100%
-        result = random.random() * 100  # Generate a random percentage
+        chance = min(base_chance, 100)  
+        result = random.random() * 100  
 
         if result <= chance:
             self.money += monster['reward']
@@ -87,6 +113,11 @@ class Player:
             return f"\033[1;32mYou defeated {monster['name']} and earned {monster['reward']} money!\033[0m"
         else:
             return f"\033[1;32mYou were defeated by {monster['name']}. Better luck next time!\033[0m"
+
+        #wheel class that contains 
+        #first index:
+        #second index:
+        #character list:
 
 def check_inventory():
     print("\nInventory:")
@@ -139,7 +170,7 @@ def initialize_game():
     world.append(
         Region(
             1,
-            "You are in a Ruin",
+            "You are in a Ruin. (east: Monstadt, south: Plains)",
             {'east': 0, 'south': 3},
             is_shop=True,
             shop_items=["Item Boost (+5% chance for monster encounters)", "Gacha Spin"]
@@ -147,18 +178,16 @@ def initialize_game():
     )
     world.append(
         Region(
-            2, "You are in Grass Plains 2", {'north':0, 'west' : 3, 'south': 5},
+            2, "You are in Grass Plains (north: Monstadt, west: Plains, south: Dragonspine)",
+             {'north':0, 'west' : 3, 'south': 5},
             is_grass_plain=True
         )
     )
 
-<<<<<<< HEAD
-=======
     world.append(
->>>>>>> 2891976c8c978ebf44bb7417d6de2a34f0774a47
         Region(
             3,
-            "You are in Plains 3",
+            "You are in Plains (north: Ruin, east: Plains, south: Liyue)",
             {'north': 1, 'east': 2, 'south': 4},
             is_grass_plain=True
         )
@@ -203,7 +232,7 @@ def initialize_game():
     world.append(
         Region(
             8,
-            "You are in Desert. (east:Sumeru, North:Water)",
+            "You are in Desert. (east: Sumeru, North: Water)",
             {'north': 9, 'east': 7, },
             is_grass_plain=True
         )
@@ -212,7 +241,7 @@ def initialize_game():
     world.append(
         Region(
             9,
-            "You are in the Water. (north:Fontaine, south:Desert)",
+            "You are in the Water. (north: Fontaine, south: Desert)",
             {'north': 10, 'south': 8},
             is_grass_plain=False
         )
@@ -256,7 +285,7 @@ def initialize_game():
     world.append(
         Region(
             14,
-            "You are in the Water.",
+            "You are in the Water. (north: Water, east: Inazuma)",
             {'north': 13, 'east': 12},
             is_grass_plain=False
         )
@@ -319,19 +348,12 @@ def obtain_item(item_number):
     player.gacha_contents.append(selected_item)
     print(f"You obtained: {selected_item}")
 
-def spin_gacha():
-    characters = ["Character A", "Character B", "Character C"]
-    items = ["Item X", "Item Y", "Item Z"]
-
-    gacha_result = random.choice(characters + items)
-    print(f"\nCongratulations! You obtained: {gacha_result}")
-    player.gacha_contents.append(gacha_result)
 
 def generate_monster():
     monsters = [
         {'name': 'Weak Monster', 'base_chance': 30, 'reward': 10},
         {'name': 'Strong Monster', 'base_chance': 50, 'reward': 20},
-        # Add more monsters as needed
+        # Add
     ]
     return random.choice(monsters)
 
