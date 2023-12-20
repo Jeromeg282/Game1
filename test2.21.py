@@ -3,42 +3,49 @@ import random
 #make inventory as list of id numbers
 class GachaSystem:
     def __init__(self):
-        # gacha_contents is now a dictionary with regions as keys and another dictionary
-        # with items and their percentages as values
-        self.gacha_contents = {
-            "Monstadt": {"Fischl": 20, "Klee": 10, "CharacterA": 5, "ItemX": 65},
-            "Liyue": {"Raiden": 15, "Yae Miko": 15, "CharacterB": 10, "ItemY": 60},
-            
+        self.banners = {
+            "Monstadt": {"characters": {"CharacterA": 5, "ItemX": 95}},
+            "Liyue": {"characters": {"CharacterB": 10, "ItemY": 90}},
+            "Inazuma": {"characters": {"Yae Miko": 6, "Raiden Shogun": 5, "Yelan": 5}},
+            "Fontaine": {"characters": {}},
+            "Sumeru": {"characters": {"Nilou": 15, "Candace": 75, "Dendro Traveler": 10, "Nahida": 5, "YaoYao": 8, "Dori": 25, "Faruzan": 25}},
         }
         self.inventory = []
 
     def update_gacha_contents(self, region_description):
-        self.current_gacha_pool = self.gacha_contents.get(region_description, {})
-        
+        self.current_banner = self.banners.get(region_description, {"characters": {}})
+
+    def view_banner(self):
+        print("\nCurrent Banner:")
+        for character, rate in self.current_banner["characters"].items():
+            print(f"{character}: {rate}%")
+
     def gacha_menu(self):
         print("\nGacha Menu:")
-        print("1. Spin Gacha")
-        print("2. Exit")
+        print("1. View Banner")
+        print("2. Spin Gacha")
+        print("3. Exit to Shop")
         choice = input("Enter your choice: ")
 
         if choice == '1':
-            self.spin_gacha()
+            self.view_banner()
         elif choice == '2':
-            print("Returning to the main menu.")
+            self.spin_gacha()
+        elif choice == '3':
+            print("Returning to the shop.")
         else:
             print("\033[1;31mInvalid choice. Please try again.\033[0m")
 
     def spin_gacha(self):
-        if not self.current_gacha_pool:
-            print("No items available in the current gacha pool.")
+        if not self.current_banner["characters"]:
+            print("No characters available in the current banner.")
             return
 
         input("Press Enter to spin the gacha...")
 
-        item = self.roll_item(self.current_gacha_pool)
-        self.inventory.append(item)
-        print("\033[1;32mCongratulations! You got {}\033[0m".format(item))
-    
+        character = self.roll_item(self.current_banner["characters"])
+        self.inventory.append(character)
+        print("\033[1;32mCongratulations! You got {}\033[0m".format(character))
 
     def roll_item(self, gacha_pool):
         total_percentage = sum(gacha_pool.values())
@@ -58,7 +65,7 @@ class Player:
     def __init__(self, current_region):
         self.current_region = current_region
         self.inventory = []
-        self.money = 0
+        self.money = 0  # Navigation game money
         self.encountered_monsters = []
         self.gacha_system = GachaSystem()
 
@@ -85,13 +92,13 @@ class Player:
 
     def spin_gacha(self):
         self.gacha_system.spin_gacha()
-
+        self.money -= 20  # Deduct money
 
     def fight_monster(self, monster):
         base_chance = monster['base_chance']
         if 'item_boost' in self.inventory:
             base_chance += self.inventory['item_boost']
-        chance = min(base_chance, 100)  
+        chance = min(base_chance, 100)
         result = random.random() * 100  # random
 
         if result <= chance:
@@ -104,8 +111,8 @@ class Player:
         base_chance = monster['base_chance']
         if 'item_boost' in self.inventory:
             base_chance += self.inventory['item_boost']
-        chance = min(base_chance, 100)  
-        result = random.random() * 100  
+        chance = min(base_chance, 100)
+        result = random.random() * 100
 
         if result <= chance:
             self.money += monster['reward']
@@ -114,14 +121,10 @@ class Player:
         else:
             return f"\033[1;32mYou were defeated by {monster['name']}. Better luck next time!\033[0m"
 
-        #wheel class that contains 
-        #first index:
-        #second index:
-        #character list:
-
 def check_inventory():
     print("\nInventory:")
-    print(f"Money: {player.money}")
+    print(f"Money (Navigation Game): {player.money}")
+    print(f"Money (Gacha System): {player.gacha_system.inventory}")
     print("---------------------")
     if player.inventory:
         print("Items:")
@@ -295,7 +298,7 @@ def initialize_game():
 
     player = Player(current_region=world[0])
 
-initialize_game()
+
 
 
 
@@ -357,9 +360,11 @@ def generate_monster():
     ]
     return random.choice(monsters)
 
+initialize_game()
+
 while True:
     player.current_region.display_info()
-    player_input = input("Enter a direction to move, 'shop' to enter the shop, 'inventory' to check your inventory, or 'q' to quit: ").lower()
+    player_input = input("Enter a direction to move, 'shop' to enter the shop, 'gacha' to spin the gacha, 'inventory' to check your inventory, or 'q' to quit: ").lower()
 
     if player_input == 'q':
         print("Thanks for playing! Goodbye.")
@@ -367,7 +372,7 @@ while True:
     elif player_input == 'shop' and player.current_region.is_shop:
         enter_shop()
     elif player_input == 'gacha':
-        player.take_action('gacha')
+        player.spin_gacha()
     elif player_input == 'inventory':
         check_inventory()
     elif player_input in player.current_region.exits:
